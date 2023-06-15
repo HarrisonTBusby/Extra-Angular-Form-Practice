@@ -57,93 +57,147 @@ export class LoginPageComponent {
   userForm!: FormGroup;
 
   department: department[] = [
-    { value: 0, viewValue: 'Police' },
-    { value: 1, viewValue: 'Paramedics' },
+    { value: 1, viewValue: 'Police' },
+    { value: 2, viewValue: 'Paramedics' },
+  ];
+
+  county: county[] = [
+    {id: 1, county_name: 'San Joaquin'},
+    {id: 2, county_name: 'Shasta'},
+    {id: 3, county_name: 'Tehama'},
+    {id: 4, county_name: 'Sacramento'},
+
   ];
 
   district: district[] = [
     {id: 1, name: 'District 1'},
-    {id: 2, name: 'District 2'}
-  ];
-  
-  county: county[] = [
-    {id: 1, county_name: 'San Joaquin'},
-    {id: 2, county_name: 'Shasta'},
-
+    {id: 2, name: 'District 2'},
+    {id: 3, name: 'District 3'},
+    {id: 4, name: 'District 4'}
   ];
 
   school: school[] = [
-    {school_id: 0, school_name: 'San Joaquin School'},
-    {school_id: 1, school_name: 'Shasta School'},
+    {school_id: 1, school_name: 'San Joaquin School'},
+    {school_id: 2, school_name: 'Shasta School'},
+    {school_id: 3, school_name: 'Tehama School'},
+    {school_id: 4, school_name: 'Sacramento School'},
 
   ];
 
   cereal: cereal[] = [
-    { id: 0, name: 'Suicide Related Emergency' },
-    { id: 1, name: 'Attempted Suicide' },
-    { id: 2, name: 'Child with Trauma' },
+    { id: 1, name: 'Suicide Related Emergency' },
+    { id: 2, name: 'Attempted Suicide' },
+    { id: 3, name: 'Child with Trauma' },
   ];
 
 
   constructor(private formBuilder: FormBuilder, public dialog: MatDialog) {}
 
-  ngOnInit() {
-    this.userForm = this.formBuilder.group({
-      fName: ['', [Validators.required, Validators.pattern('^[a-zA-Z]+$'), Validators.maxLength(12), Validators.minLength(2)]],
-      lName: ['', [Validators.required, Validators.pattern('^[a-zA-Z]+$'), Validators.minLength(2)]],
-      badge_id: ['', [Validators.required, Validators.minLength(2)]],
-      county: [null, Validators.required],
-      department: [null, Validators.required],
-      school: [{value: null, disabled: true}, Validators.required],
-      district: [{value: null, disabled: true}, Validators.required],
-      cereal: this.formBuilder.array([]),
-    });
+ ngOnInit() {
+  this.userForm = this.formBuilder.group({
+    fName: ['', [Validators.required, Validators.pattern('^[a-zA-Z]+$'), Validators.maxLength(12), Validators.minLength(2)]],
+    lName: ['', [Validators.required, Validators.pattern('^[a-zA-Z]+$'), Validators.minLength(2)]],
+    badge_id: ['', [Validators.required, Validators.minLength(2)]],
+    county: [null, Validators.required],
+    department: [null, Validators.required],
+    school: [{ value: null, disabled: true }, Validators.required],
+    district: [{ value: null, disabled: true }, Validators.required],
+    cereal: this.formBuilder.array([]),
+  });
 
-    let countyClicked = false;
-    let districtValueChanged = false;
-    
-    this.userForm.get('county')?.valueChanges.subscribe((selectedCountyId: number) => {
-      const schoolControl = this.userForm.get('school');
-      const districtControl = this.userForm.get('district');
-    
-      if (selectedCountyId) {
-        districtControl?.enable();
+  let countyClicked = false;
+  let districtValueChanged = false;
+
+  this.userForm.get('county')?.valueChanges.subscribe((selectedCountyId: number) => {
+    const districtControl = this.userForm.get('district');
+    const schoolControl = this.userForm.get('school');
+
+    if (selectedCountyId === 1) { // San Joaquin County
+      districtControl?.enable();
+      districtControl?.setValue(null);
+      schoolControl?.disable();
+      schoolControl?.setValue(null);
+      countyClicked = true;
+    } else {
+      districtControl?.disable();
+      districtControl?.setValue(null);
+      schoolControl?.disable();
+      schoolControl?.setValue(null);
+      countyClicked = false;
+    }
+
+    if (districtControl?.value && countyClicked && districtValueChanged) {
+      schoolControl?.enable();
+    } else {
+      schoolControl?.disable();
+      schoolControl?.setValue(null);
+    }
+  });
+
+  this.userForm.get('district')?.valueChanges.subscribe((selectedDistrictId: number) => {
+    districtValueChanged = true;
+
+    const schoolControl = this.userForm.get('school');
+
+    if (this.userForm.get('county')?.value === 1) { // San Joaquin County
+      if (selectedDistrictId === 3 || selectedDistrictId === 4) {
         schoolControl?.disable();
         schoolControl?.setValue(null);
-        countyClicked = true;
-      } else {
-        districtControl?.disable();
-        districtControl?.setValue(null);
-        schoolControl?.disable();
-        schoolControl?.setValue(null);
-        countyClicked = false;
-        return;
-      }
-    
-      if (districtControl?.value && countyClicked && districtValueChanged) {
+      } else if (selectedDistrictId === 1) { // District 1
         schoolControl?.enable();
+        this.school = this.school.filter(s => s.school_id === 1); // Filter only San Joaquin School
+      } else if (selectedDistrictId === 2) { // District 2
+        schoolControl?.enable();
+        this.school = this.school.filter(s => s.school_id === 4); // Filter only Sacramento School
       } else {
         schoolControl?.disable();
         schoolControl?.setValue(null);
       }
-    });
-    
-    this.userForm.get('district')?.valueChanges.subscribe((selectedDistrictId: number) => {
-      districtValueChanged = true;
-    
-      const schoolControl = this.userForm.get('school');
-      const districtControl = this.userForm.get('district');
-    
+    } else {
       if (selectedDistrictId && countyClicked && districtValueChanged) {
         schoolControl?.enable();
       } else {
         schoolControl?.disable();
         schoolControl?.setValue(null);
       }
-    });
-    
+    }
+  });
 
-  }
+  this.userForm.get('county')?.valueChanges.subscribe((selectedCountyId: number) => {
+    const districtControl = this.userForm.get('district');
+    const districtOptions = this.district.filter(d => d.id <= 2); // Filter only District 1 and District 2
+
+    if (selectedCountyId === 1) { // San Joaquin County
+      districtControl?.enable();
+      districtControl?.setValue(null);
+      this.district = districtOptions;
+    } else {
+      districtControl?.disable();
+      districtControl?.setValue(null);
+      this.district = this.district; // Reset district options to the original values
+    }
+  });
+
+  this.userForm.get('district')?.valueChanges.subscribe((selectedDistrictId: number) => {
+    const schoolControl = this.userForm.get('school');
+
+    if (selectedDistrictId === 1) { // District 1
+      schoolControl?.setValue(1); // Select San Joaquin School
+    } else if (selectedDistrictId === 2) { // District 2
+      schoolControl?.setValue(4); // Select Sacramento School
+    } else {
+      schoolControl?.setValue(null);
+    }
+  });
+}
+
+  
+  
+  
+  
+  
+  
+  
 
   toggleCerealSelection(cerealId: number) {
     const cerealFormArray = this.userForm.get('cereal') as FormArray;

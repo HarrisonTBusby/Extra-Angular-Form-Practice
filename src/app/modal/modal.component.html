@@ -1,0 +1,15 @@
+<h1 mat-dialog-title class="d-flex justify-content-center">Form Submitted!</h1>
+<div mat-dialog-content>  
+    <div class="mt-5 py-3" >
+        <div>First Reponder ID: {{ data.badge_id}}</div>
+        <div>Department: {{data.department}}</div>
+        <div>First Name: {{data.fName}}</div>
+        <div>Last Name: {{data.lName}}</div>
+        <div>County: {{data.county}}</div>
+        <div>District: {{ data.district }}</div>
+        <div>School: {{data.school}}</div>
+        <div>Cereal: {{ data.cereal }}</div>
+      </div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()" class="d-flex justify-content-center">Close</button>
+</div>

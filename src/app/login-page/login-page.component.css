@@ -1,0 +1,17 @@
+.btn{
+    background-color: gray;
+}
+
+.container 
+{
+    width: 35%;
+    background-color: rgb(236, 211, 179);
+    padding: 20px;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+
+textarea{
+    width: 100%;
+}
+
